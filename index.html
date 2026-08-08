@@ -3,251 +3,633 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>3D Rotating Chess Game</title>
+  <title>Welcome on Chess Pool</title>
   <style>
-    * { box-sizing: border-box; margin: 0; padding: 0; }
+    * { box-sizing: border-box; margin: 0; padding: 0; user-select: none; }
     body {
-      overflow: hidden;
-      background: #111;
       font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: radial-gradient(circle at center, #0B192C 0%, #000000 100%);
       color: #fff;
+      overflow: hidden;
+      width: 100vw;
+      height: 100vh;
     }
-    #ui {
+
+    /* UI Overlay Elements */
+    .top-bar {
       position: absolute;
       top: 20px;
+      left: 20px;
+      right: 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      z-index: 20;
+    }
+
+    /* Profile Box */
+    .profile-card {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      background: rgba(15, 23, 42, 0.75);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      padding: 10px 18px;
+      border-radius: 30px;
+      backdrop-filter: blur(10px);
+      box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+    .profile-card:hover {
+      border-color: #38bdf8;
+      box-shadow: 0 0 15px rgba(56, 189, 248, 0.4);
+    }
+    .profile-avatar {
+      width: 42px;
+      height: 42px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #38bdf8, #818cf8);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: bold;
+      font-size: 1.2rem;
+      border: 2px solid #fff;
+    }
+    .profile-name { font-size: 1rem; font-weight: 600; color: #f8fafc; }
+    .edit-icon { font-size: 0.8rem; color: #94a3b8; margin-left: 4px; }
+
+    /* Title */
+    .header-title {
+      position: absolute;
+      left: 50%;
+      transform: translateX(-50%);
+      font-size: 2.2rem;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 3px;
+      background: linear-gradient(180deg, #FFFFFF 0%, #94A3B8 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      text-shadow: 0 0 20px rgba(255, 255, 255, 0.2);
+    }
+
+    /* Round Stopwatch (Right Side) */
+    .round-timer {
+      width: 80px;
+      height: 80px;
+      border-radius: 50%;
+      background: rgba(15, 23, 42, 0.85);
+      border: 3px solid #38bdf8;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 0 20px rgba(56, 189, 248, 0.3);
+      backdrop-filter: blur(8px);
+    }
+    .timer-label { font-size: 0.65rem; color: #94a3b8; text-transform: uppercase; }
+    .timer-count { font-size: 1.1rem; font-weight: 700; font-family: monospace; color: #38bdf8; }
+
+    /* Controls & Audio Toggle */
+    .top-right-controls {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+    }
+    .audio-btn {
+      background: rgba(15, 23, 42, 0.8);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      color: #fff;
+      font-size: 1.2rem;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: 0.2s;
+    }
+    .audio-btn:hover { background: rgba(56, 189, 248, 0.2); border-color: #38bdf8; }
+
+    /* Central Menu overlay */
+    #menu-overlay {
+      position: absolute;
+      bottom: 60px;
       left: 50%;
       transform: translateX(-50%);
       display: flex;
       flex-direction: column;
       align-items: center;
-      gap: 10px;
-      z-index: 10;
-      background: rgba(20, 20, 20, 0.85);
-      padding: 15px 30px;
-      border-radius: 12px;
-      box-shadow: 0 10px 30px rgba(0,0,0,0.6);
-      backdrop-filter: blur(5px);
-      border: 1px solid rgba(255,255,255,0.1);
+      gap: 15px;
+      z-index: 30;
     }
-    .status { font-size: 1.2rem; font-weight: 600; text-transform: uppercase; letter-spacing: 1px; }
-    .timer { font-size: 2.2rem; font-weight: bold; font-family: monospace; color: #ff4757; }
-    #info-text { font-size: 0.9rem; color: #aaa; margin-top: 2px; }
+
+    .btn {
+      width: 220px;
+      padding: 14px 28px;
+      font-size: 1.05rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: #fff;
+      background: linear-gradient(135deg, #1e293b, #0f172a);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      border-radius: 30px;
+      cursor: pointer;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+      transition: all 0.3s ease;
+      text-align: center;
+    }
+    .btn:hover {
+      transform: translateY(-2px);
+      border-color: #38bdf8;
+      box-shadow: 0 0 20px rgba(56, 189, 248, 0.5);
+      background: linear-gradient(135deg, #0284c7, #0369a1);
+    }
+    .btn-secondary {
+      background: rgba(30, 41, 59, 0.6);
+    }
+
+    .sub-menu {
+      display: none;
+      flex-direction: column;
+      gap: 10px;
+      animation: fadeIn 0.3s ease-in-out forwards;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Modal for Profile & Share Link */
+    .modal {
+      display: none;
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background: rgba(15, 23, 42, 0.95);
+      border: 1px solid #38bdf8;
+      padding: 30px;
+      border-radius: 20px;
+      z-index: 100;
+      box-shadow: 0 0 30px rgba(0,0,0,0.8);
+      flex-direction: column;
+      gap: 15px;
+      width: 320px;
+    }
+    .modal h3 { color: #38bdf8; text-align: center; }
+    .modal input {
+      padding: 10px;
+      border-radius: 8px;
+      border: 1px solid rgba(255,255,255,0.2);
+      background: #0f172a;
+      color: #fff;
+      outline: none;
+    }
+
+    #canvas-container { width: 100vw; height: 100vh; position: absolute; top:0; left:0; z-index: 1; }
   </style>
 
-  <!-- Include Three.js, OrbitControls, and Chess.js -->
+  <!-- Libraries: Three.js, OrbitControls, Chess.js, PeerJS -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/chess.js/0.10.3/chess.min.js"></script>
+  <script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js"></script>
 </head>
 <body>
 
-  <div id="ui">
-    <div class="status" id="turn-display">Turn: <span id="player-turn" style="color: #fff;">White</span></div>
-    <div class="timer" id="timer">03:00</div>
-    <div id="info-text">Click a piece to select, then click a tile to move</div>
+  <!-- Top Bar UI -->
+  <div class="top-bar">
+    <div class="profile-card" onclick="openProfileModal()">
+      <div class="profile-avatar" id="avatar-char">P</div>
+      <span class="profile-name" id="display-name">Player 1</span>
+      <span class="edit-icon">✏️</span>
+    </div>
+
+    <div class="header-title">Big Welcome on Chess Pool</div>
+
+    <div class="top-right-controls">
+      <button class="audio-btn" id="audio-toggle" onclick="toggleAudio()">🎵</button>
+      <div class="round-timer">
+        <span class="timer-label">Time</span>
+        <span class="timer-count" id="timer-val">03:00</span>
+      </div>
+    </div>
   </div>
 
-<script>
-  // Game Logic
-  const game = new Chess();
-  const BOARD_SIZE = 8;
-  const TILE_SIZE = 2;
+  <!-- Landing & Game Navigation Menu -->
+  <div id="menu-overlay">
+    <div id="main-buttons" style="display: flex; flex-direction: column; gap: 12px;">
+      <button class="btn" onclick="showNewMatchOptions()">New Match</button>
+      <button class="btn btn-secondary" id="continue-btn" onclick="continueMatch()">Continue</button>
+    </div>
 
-  // Scene setup
+    <div class="sub-menu" id="new-match-options">
+      <button class="btn" onclick="startVsComputer()">1. With Computer</button>
+      <button class="btn" onclick="inviteFriend()">2. Invite Your Friend</button>
+      <button class="btn btn-secondary" onclick="hideSubMenu()" style="width: auto; padding: 8px 16px; align-self: center; font-size: 0.8rem;">Back</button>
+    </div>
+  </div>
+
+  <!-- Profile Edit Modal -->
+  <div class="modal" id="profile-modal">
+    <h3>Edit Profile</h3>
+    <input type="text" id="username-input" placeholder="Enter your name" maxlength="15">
+    <button class="btn" onclick="saveProfile()" style="width: 100%;">Save</button>
+  </div>
+
+  <!-- Share Link Modal -->
+  <div class="modal" id="share-modal">
+    <h3>Invite Friend</h3>
+    <p style="font-size: 0.85rem; color: #94a3b8; text-align: center;">Share this link with your friend to play together live:</p>
+    <input type="text" id="share-url" readonly>
+    <button class="btn" onclick="copyInviteLink()" style="width: 100%;">Copy Link</button>
+    <button class="btn btn-secondary" onclick="closeShareModal()" style="width: 100%;">Close</button>
+  </div>
+
+  <div id="canvas-container"></div>
+
+<script>
+  // Game state & Mode flags
+  let game = new Chess();
+  let vsAI = false;
+  let isMultiplayer = false;
+  let peer = null;
+  let conn = null;
+  let myColor = 'w';
+  let gameStarted = false;
+  let isGlobeMode = true;
+
+  // Audio Synth Context
+  let audioCtx = null;
+  let isMuted = true;
+
+  function initAudio() {
+    if (!audioCtx) {
+      audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      playAmbientSound();
+    }
+  }
+
+  function toggleAudio() {
+    initAudio();
+    isMuted = !isMuted;
+    document.getElementById('audio-toggle').innerText = isMuted ? '🔇' : '🎵';
+  }
+
+  function playAmbientSound() {
+    if (!audioCtx || isMuted) return;
+    try {
+      const osc = audioCtx.createOscillator();
+      const gain = audioCtx.createGain();
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime(110, audioCtx.currentTime);
+      gain.gain.setValueAtTime(0.01, audioCtx.currentTime);
+      osc.connect(gain);
+      gain.connect(audioCtx.destination);
+      osc.start();
+      osc.stop(audioCtx.currentTime + 2);
+    } catch(e){}
+  }
+
+  // Timer Management
+  let timeLeft = 180;
+  let timerInterval = null;
+
+  function resetTimer() {
+    clearInterval(timerInterval);
+    timeLeft = 180;
+    updateTimerUI();
+    if (gameStarted) {
+      timerInterval = setInterval(() => {
+        timeLeft--;
+        updateTimerUI();
+        if (timeLeft <= 0) {
+          clearInterval(timerInterval);
+          alert("Time's up!");
+        }
+      }, 1000);
+    }
+  }
+
+  function updateTimerUI() {
+    const m = Math.floor(timeLeft / 60).toString().padStart(2, '0');
+    const s = (timeLeft % 60).toString().padStart(2, '0');
+    document.getElementById('timer-val').innerText = `${m}:${s}`;
+  }
+
+  // Profile Management
+  function openProfileModal() {
+    document.getElementById('profile-modal').style.display = 'flex';
+  }
+  function saveProfile() {
+    const val = document.getElementById('username-input').value.trim();
+    if (val) {
+      document.getElementById('display-name').innerText = val;
+      document.getElementById('avatar-char').innerText = val.charAt(0).toUpperCase();
+      localStorage.setItem('chess_username', val);
+    }
+    document.getElementById('profile-modal').style.display = 'none';
+  }
+
+  // Three.js Scene Setup
+  const container = document.getElementById('canvas-container');
   const scene = new THREE.Scene();
-  scene.background = new THREE.Color(0x181818);
+  scene.background = new THREE.Color(0x000000);
 
   const camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 1000);
-  const renderer = new THREE.WebGLRenderer({ antialias: true });
+  camera.position.set(0, 0, 22);
+
+  const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
   renderer.setSize(window.innerWidth, window.innerHeight);
   renderer.shadowMap.enabled = true;
-  document.body.appendChild(renderer.domElement);
+  renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+  container.appendChild(renderer.domElement);
 
   const controls = new THREE.OrbitControls(camera, renderer.domElement);
   controls.enableDamping = true;
   controls.dampingFactor = 0.05;
-  controls.maxPolarAngle = Math.PI / 2 - 0.05;
 
-  // Lights
-  const ambientLight = new THREE.AmbientLight(0xffffff, 0.6);
+  // Lighting
+  const ambientLight = new THREE.AmbientLight(0xffffff, 0.7);
   scene.add(ambientLight);
 
-  const dirLight = new THREE.DirectionalLight(0xffffff, 0.8);
-  dirLight.position.set(10, 20, 10);
-  dirLight.castShadow = true;
-  dirLight.shadow.mapSize.width = 2048;
-  dirLight.shadow.mapSize.height = 2048;
-  scene.add(dirLight);
+  const dirLight1 = new THREE.DirectionalLight(0x38bdf8, 1.2);
+  dirLight1.position.set(15, 20, 15);
+  dirLight1.castShadow = true;
+  scene.add(dirLight1);
 
-  // Materials
-  const whiteSquareMat = new THREE.MeshStandardMaterial({ color: 0xeeeeee, roughness: 0.3 });
-  const blackSquareMat = new THREE.MeshStandardMaterial({ color: 0x222222, roughness: 0.3 });
-  const highlightMat = new THREE.MeshStandardMaterial({ color: 0x2ed573, roughness: 0.2 });
-  const selectedSquareMat = new THREE.MeshStandardMaterial({ color: 0xffa500, roughness: 0.2 });
+  const dirLight2 = new THREE.DirectionalLight(0xffffff, 0.6);
+  dirLight2.position.set(-15, -10, -15);
+  scene.add(dirLight2);
 
-  const whitePieceMat = new THREE.MeshStandardMaterial({ color: 0xf5f5f5, roughness: 0.1, metalness: 0.1 });
-  const blackPieceMat = new THREE.MeshStandardMaterial({ color: 0x1c1c1c, roughness: 0.2, metalness: 0.2 });
+  // Material Palette (High Polish Metallic - Black and White)
+  const whitePieceMat = new THREE.MeshStandardMaterial({
+    color: 0xf8fafc, roughness: 0.1, metalness: 0.85
+  });
+  const blackPieceMat = new THREE.MeshStandardMaterial({
+    color: 0x0f172a, roughness: 0.2, metalness: 0.9
+  });
+  const whiteSquareMat = new THREE.MeshStandardMaterial({ color: 0xe2e8f0, roughness: 0.2, metalness: 0.3 });
+  const blackSquareMat = new THREE.MeshStandardMaterial({ color: 0x1e293b, roughness: 0.3, metalness: 0.5 });
+  const highlightMat = new THREE.MeshStandardMaterial({ color: 0x38bdf8, roughness: 0.2, emissive: 0x0284c7 });
 
-  // Board setup
+  // Globe Showcase Group
+  const globeGroup = new THREE.Group();
+  scene.add(globeGroup);
+
+  function createChessGlobe() {
+    const sphereRadius = 6;
+    const sphereGeom = new THREE.SphereGeometry(sphereRadius, 32, 32);
+    
+    // Canvas texture generating checkered globe
+    const canvas = document.createElement('canvas');
+    canvas.width = 512; canvas.height = 256;
+    const ctx = canvas.getContext('2d');
+    const cols = 16, rows = 8;
+    const sw = canvas.width / cols, sh = canvas.height / rows;
+    for(let r=0; r<rows; r++) {
+      for(let c=0; c<cols; c++) {
+        ctx.fillStyle = (r + c) % 2 === 0 ? '#f8fafc' : '#0f172a';
+        ctx.fillRect(c*sw, r*sh, sw, sh);
+      }
+    }
+    const texture = new THREE.CanvasTexture(canvas);
+    const globeMat = new THREE.MeshStandardMaterial({ map: texture, roughness: 0.3, metalness: 0.4 });
+    const globeMesh = new THREE.Mesh(sphereGeom, globeMat);
+    globeGroup.add(globeMesh);
+
+    // Attach decorative pieces on surface matching user Image 1
+    const piecePositions = [
+      { type: 'k', lat: 30, lon: 45, col: 'b' },
+      { type: 'q', lat: 20, lon: 90, col: 'b' },
+      { type: 'n', lat: -40, lon: 120, col: 'b' },
+      { type: 'p', lat: 50, lon: -60, col: 'w' },
+      { type: 'r', lat: -30, lon: -120, col: 'w' }
+    ];
+
+    piecePositions.forEach(p => {
+      const mesh = createPieceMesh(p.type, p.col);
+      const phi = (90 - p.lat) * (Math.PI / 180);
+      const theta = (p.lon + 180) * (Math.PI / 180);
+
+      mesh.position.x = -(sphereRadius + 0.2) * Math.sin(phi) * Math.cos(theta);
+      mesh.position.y = (sphereRadius + 0.2) * Math.cos(phi);
+      mesh.position.z = (sphereRadius + 0.2) * Math.sin(phi) * Math.sin(theta);
+
+      mesh.lookAt(0,0,0);
+      mesh.rotateX(Math.PI / 2);
+      globeGroup.add(mesh);
+    });
+  }
+
+  // Standard 3D Flat Board Group
   const boardGroup = new THREE.Group();
-  scene.add(boardGroup);
   const tiles = {};
   const pieceMeshes = {};
 
-  function createBoard() {
+  function createFlatBoard() {
+    const TILE_SIZE = 1.8;
     for (let r = 0; r < 8; r++) {
       for (let c = 0; c < 8; c++) {
         const isWhite = (r + c) % 2 === 0;
-        const geom = new THREE.BoxGeometry(TILE_SIZE, 0.4, TILE_SIZE);
+        const geom = new THREE.BoxGeometry(TILE_SIZE, 0.3, TILE_SIZE);
         const mat = isWhite ? whiteSquareMat : blackSquareMat;
         const tile = new THREE.Mesh(geom, mat);
+        tile.position.set((c - 3.5) * TILE_SIZE, -0.15, (3.5 - r) * TILE_SIZE);
         
-        tile.position.set((c - 3.5) * TILE_SIZE, -0.2, (3.5 - r) * TILE_SIZE);
-        tile.receiveShadow = true;
-        
-        const squareName = String.fromCharCode(97 + c) + (r + 1);
+        const squareName = String.fromCharCode(97 + c) + (8 - r);
         tile.userData = { square: squareName, defaultMat: mat };
-        
         boardGroup.add(tile);
         tiles[squareName] = tile;
       }
     }
   }
 
-  // 3D Piece Models Generation
-  function createPieceGeometry(type) {
+  // 3D Piece Models Generator (Refined Glossy Metallic)
+  function createPieceMesh(type, color) {
     const group = new THREE.Group();
-    let geom;
+    const mat = color === 'w' ? whitePieceMat : blackPieceMat;
 
-    // Base for all pieces
-    const base = new THREE.Mesh(new THREE.CylinderGeometry(0.7, 0.8, 0.3, 16), whitePieceMat);
-    base.position.y = 0.15;
-    base.castShadow = true;
+    const base = new THREE.Mesh(new THREE.CylinderGeometry(0.6, 0.7, 0.25, 16), mat);
+    base.position.y = 0.125;
     group.add(base);
 
     if (type === 'p') {
-      const body = new THREE.Mesh(new THREE.ConeGeometry(0.5, 1.0, 16), whitePieceMat);
-      body.position.y = 0.8;
+      const body = new THREE.Mesh(new THREE.ConeGeometry(0.4, 0.8, 16), mat);
+      body.position.y = 0.65;
       group.add(body);
     } else if (type === 'r') {
-      const body = new THREE.Mesh(new THREE.CylinderGeometry(0.5, 0.6, 1.2, 16), whitePieceMat);
-      body.position.y = 0.9;
+      const body = new THREE.Mesh(new THREE.CylinderGeometry(0.45, 0.5, 0.9, 16), mat);
+      body.position.y = 0.7;
       group.add(body);
     } else if (type === 'n') {
-      const body = new THREE.Mesh(new THREE.BoxGeometry(0.5, 1.2, 0.7), whitePieceMat);
-      body.position.y = 0.9;
+      const body = new THREE.Mesh(new THREE.BoxGeometry(0.4, 0.9, 0.6), mat);
+      body.position.y = 0.7;
       group.add(body);
     } else if (type === 'b') {
-      const body = new THREE.Mesh(new THREE.CylinderGeometry(0.2, 0.5, 1.4, 16), whitePieceMat);
-      body.position.y = 1.0;
+      const body = new THREE.Mesh(new THREE.CylinderGeometry(0.15, 0.45, 1.1, 16), mat);
+      body.position.y = 0.8;
       group.add(body);
     } else if (type === 'q') {
-      const body = new THREE.Mesh(new THREE.CylinderGeometry(0.4, 0.6, 1.6, 16), whitePieceMat);
-      body.position.y = 1.1;
-      const top = new THREE.Mesh(new THREE.SphereGeometry(0.35, 16, 16), whitePieceMat);
-      top.position.y = 2.0;
-      group.add(body, top);
+      const body = new THREE.Mesh(new THREE.CylinderGeometry(0.3, 0.5, 1.3, 16), mat);
+      body.position.y = 0.9;
+      const crown = new THREE.Mesh(new THREE.SphereGeometry(0.3, 16, 16), mat);
+      crown.position.y = 1.6;
+      group.add(body, crown);
     } else if (type === 'k') {
-      const body = new THREE.Mesh(new THREE.CylinderGeometry(0.4, 0.6, 1.7, 16), whitePieceMat);
-      body.position.y = 1.15;
-      const crossHorizontal = new THREE.Mesh(new THREE.BoxGeometry(0.5, 0.15, 0.15), whitePieceMat);
-      crossHorizontal.position.y = 2.1;
-      const crossVertical = new THREE.Mesh(new THREE.BoxGeometry(0.15, 0.5, 0.15), whitePieceMat);
-      crossVertical.position.y = 2.1;
-      group.add(body, crossHorizontal, crossVertical);
+      const body = new THREE.Mesh(new THREE.CylinderGeometry(0.35, 0.55, 1.4, 16), mat);
+      body.position.y = 0.95;
+      const cross = new THREE.Mesh(new THREE.BoxGeometry(0.4, 0.12, 0.12), mat);
+      cross.position.y = 1.7;
+      group.add(body, cross);
     }
 
-    group.traverse(child => {
-      if (child.isMesh) child.castShadow = true;
-    });
-
+    group.traverse(child => { if(child.isMesh) child.castShadow = true; });
     return group;
   }
 
-  function renderPieces() {
-    // Clear old pieces
-    Object.values(pieceMeshes).forEach(mesh => scene.remove(mesh));
-    
+  function renderFlatBoardPieces() {
+    Object.values(pieceMeshes).forEach(m => boardGroup.remove(m));
     const boardState = game.board();
+
     for (let r = 0; r < 8; r++) {
       for (let c = 0; c < 8; c++) {
         const piece = boardState[r][c];
         if (piece) {
           const squareName = String.fromCharCode(97 + c) + (8 - r);
-          const pieceObj = createPieceGeometry(piece.type);
-          
-          // Apply materials
-          pieceObj.traverse(child => {
-            if (child.isMesh) child.material = piece.color === 'w' ? whitePieceMat : blackPieceMat;
-          });
-
+          const mesh = createPieceMesh(piece.type, piece.color);
           const tile = tiles[squareName];
-          pieceObj.position.set(tile.position.x, 0, tile.position.z);
-          scene.add(pieceObj);
-          pieceMeshes[squareName] = pieceObj;
+          mesh.position.set(tile.position.x, 0, tile.position.z);
+          boardGroup.add(mesh);
+          pieceMeshes[squareName] = mesh;
         }
       }
     }
   }
 
-  // Camera Control & Smooth Rotation
-  let targetAngle = 0;
-  let currentAngle = 0;
-  const radius = 22;
+  // Menu Handling
+  function showNewMatchOptions() {
+    initAudio();
+    document.getElementById('main-buttons').style.display = 'none';
+    document.getElementById('new-match-options').style.display = 'flex';
+  }
+  function hideSubMenu() {
+    document.getElementById('main-buttons').style.display = 'flex';
+    document.getElementById('new-match-options').style.display = 'none';
+  }
 
-  function setCameraAngle(angle, animate = true) {
-    targetAngle = angle;
-    if (!animate) {
-      currentAngle = angle;
-      updateCameraPosition();
+  function startFlatGame() {
+    isGlobeMode = false;
+    scene.remove(globeGroup);
+    scene.add(boardGroup);
+    game.reset();
+    renderFlatBoardPieces();
+    document.getElementById('menu-overlay').style.display = 'none';
+    gameStarted = true;
+    resetTimer();
+    saveGameState();
+  }
+
+  function startVsComputer() {
+    vsAI = true;
+    isMultiplayer = false;
+    myColor = 'w';
+    camera.position.set(0, 16, 16);
+    startFlatGame();
+  }
+
+  function inviteFriend() {
+    vsAI = false;
+    isMultiplayer = true;
+    myColor = 'w';
+    peer = new Peer();
+
+    peer.on('open', (id) => {
+      const shareUrl = `${window.location.origin}${window.location.pathname}?join=${id}`;
+      document.getElementById('share-url').value = shareUrl;
+      document.getElementById('share-modal').style.display = 'flex';
+    });
+
+    peer.on('connection', (c) => {
+      conn = c;
+      setupPeerEvents();
+      document.getElementById('share-modal').style.display = 'none';
+      startFlatGame();
+    });
+  }
+
+  function checkJoinLink() {
+    const params = new URLSearchParams(window.location.search);
+    const joinId = params.get('join');
+    if (joinId) {
+      vsAI = false;
+      isMultiplayer = true;
+      myColor = 'b';
+      peer = new Peer();
+
+      peer.on('open', () => {
+        conn = peer.connect(joinId);
+        setupPeerEvents();
+        camera.position.set(0, 16, -16);
+        startFlatGame();
+      });
     }
   }
 
-  function updateCameraPosition() {
-    camera.position.x = radius * Math.sin(currentAngle);
-    camera.position.z = radius * Math.cos(currentAngle);
-    camera.position.y = 16;
-    camera.lookAt(0, 0, 0);
-  }
-
-  // Timer Management
-  let timeLeft = 180; // 3 minutes in seconds
-  let timerInterval = null;
-
-  function startTimer() {
-    clearInterval(timerInterval);
-    timeLeft = 180;
-    updateTimerDisplay();
-
-    timerInterval = setInterval(() => {
-      timeLeft--;
-      updateTimerDisplay();
-
-      if (timeLeft <= 0) {
-        clearInterval(timerInterval);
-        alert(`Time's up! ${game.turn() === 'w' ? 'Black' : 'White'} wins by timeout!`);
+  function setupPeerEvents() {
+    conn.on('data', (data) => {
+      if (data.type === 'move') {
+        game.move(data.move);
+        renderFlatBoardPieces();
+        resetTimer();
+        saveGameState();
       }
-    }, 1000);
+    });
   }
 
-  function updateTimerDisplay() {
-    const mins = Math.floor(timeLeft / 60).toString().padStart(2, '0');
-    const secs = (timeLeft % 60).toString().padStart(2, '0');
-    document.getElementById('timer').innerText = `${mins}:${secs}`;
+  function copyInviteLink() {
+    const copyText = document.getElementById('share-url');
+    copyText.select();
+    navigator.clipboard.writeText(copyText.value);
+    alert("Invite link copied to clipboard!");
+  }
+  function closeShareModal() {
+    document.getElementById('share-modal').style.display = 'none';
   }
 
-  // Selection & Interactions
-  let selectedSquare = null;
+  // Save / Continue Match Logic
+  function saveGameState() {
+    localStorage.setItem('chess_saved_fen', game.fen());
+  }
+  function continueMatch() {
+    const savedFen = localStorage.getItem('chess_saved_fen');
+    if (savedFen) {
+      game.load(savedFen);
+      startFlatGame();
+    } else {
+      alert("No previous game found. Starting a new match!");
+      showNewMatchOptions();
+    }
+  }
+
+  // Interaction Raycasting for Moves
   const raycaster = new THREE.Raycaster();
   const mouse = new THREE.Vector2();
+  let selectedSquare = null;
 
-  function clearHighlights() {
-    Object.values(tiles).forEach(t => t.material = t.userData.defaultMat);
-  }
+  window.addEventListener('pointerdown', (e) => {
+    if (isGlobeMode || !gameStarted) return;
+    if (isMultiplayer && game.turn() !== myColor) return;
+    if (vsAI && game.turn() === 'b') return;
 
-  function onPointerDown(event) {
-    mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
-    mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
+    mouse.x = (e.clientX / window.innerWidth) * 2 - 1;
+    mouse.y = -(e.clientY / window.innerHeight) * 2 + 1;
 
     raycaster.setFromCamera(mouse, camera);
     const intersects = raycaster.intersectObjects(boardGroup.children);
@@ -257,84 +639,82 @@
       const square = tile.userData.square;
 
       if (selectedSquare) {
-        // Attempt move
-        const move = game.move({ from: selectedSquare, to: square, promotion: 'q' });
+        const moveObj = { from: selectedSquare, to: square, promotion: 'q' };
+        const move = game.move(moveObj);
 
         if (move) {
-          renderPieces();
+          renderFlatBoardPieces();
           clearHighlights();
           selectedSquare = null;
-          switchTurn();
+          resetTimer();
+          saveGameState();
+
+          if (isMultiplayer && conn) {
+            conn.send({ type: 'move', move: moveObj });
+          } else if (vsAI) {
+            setTimeout(makeAIMove, 500);
+          }
           return;
         }
       }
 
-      // Selection logic
       const piece = game.get(square);
       if (piece && piece.color === game.turn()) {
         selectedSquare = square;
         clearHighlights();
-        tile.material = selectedSquareMat;
+        tile.material = highlightMat;
 
-        // Highlight valid moves
         const moves = game.moves({ square: square, verbose: true });
         moves.forEach(m => {
-          tiles[m.to].material = highlightMat;
+          if (tiles[m.to]) tiles[m.to].material = highlightMat;
         });
       } else {
         selectedSquare = null;
         clearHighlights();
       }
     }
+  });
+
+  function clearHighlights() {
+    Object.values(tiles).forEach(t => t.material = t.userData.defaultMat);
   }
 
-  function switchTurn() {
-    const currentTurn = game.turn();
-    const turnText = currentTurn === 'w' ? 'White' : 'Black';
-    const playerTurnEl = document.getElementById('player-turn');
-    playerTurnEl.innerText = turnText;
-    playerTurnEl.style.color = currentTurn === 'w' ? '#ffffff' : '#aaaaaa';
-
-    // Rotate camera 180 degrees
-    if (currentTurn === 'w') {
-      setCameraAngle(0);
-    } else {
-      setCameraAngle(Math.PI);
-    }
-
-    // Reset and restart 3-minute timer
-    startTimer();
-
-    if (game.in_checkmate()) {
-      alert(`Checkmate! ${currentTurn === 'w' ? 'Black' : 'White'} wins!`);
-      clearInterval(timerInterval);
-    } else if (game.in_draw()) {
-      alert('Game over! Draw!');
-      clearInterval(timerInterval);
+  function makeAIMove() {
+    const moves = game.moves();
+    if (moves.length > 0) {
+      const randomMove = moves[Math.floor(Math.random() * moves.length)];
+      game.move(randomMove);
+      renderFlatBoardPieces();
+      resetTimer();
+      saveGameState();
     }
   }
 
   // Initialization
-  createBoard();
-  renderPieces();
-  setCameraAngle(0, false);
-  startTimer();
+  createChessGlobe();
+  createFlatBoard();
 
-  window.addEventListener('pointerdown', onPointerDown);
+  // Load saved username if present
+  const savedUser = localStorage.getItem('chess_username');
+  if (savedUser) {
+    document.getElementById('display-name').innerText = savedUser;
+    document.getElementById('avatar-char').innerText = savedUser.charAt(0).toUpperCase();
+  }
+
+  checkJoinLink();
+
   window.addEventListener('resize', () => {
     camera.aspect = window.innerWidth / window.innerHeight;
     camera.updateProjectionMatrix();
     renderer.setSize(window.innerWidth, window.innerHeight);
   });
 
-  // Animation Loop
+  // Main Render Loop
   function animate() {
     requestAnimationFrame(animate);
 
-    // Smooth camera rotation transition
-    if (Math.abs(targetAngle - currentAngle) > 0.01) {
-      currentAngle += (targetAngle - currentAngle) * 0.05;
-      updateCameraPosition();
+    if (isGlobeMode) {
+      globeGroup.rotation.y += 0.005;
     }
 
     controls.update();
