@@ -15,7 +15,7 @@
       height: 100vh;
     }
 
-    /* UI Overlay Elements */
+    /* Top Bar Elements */
     .top-bar {
       position: absolute;
       top: 20px;
@@ -27,17 +27,17 @@
       z-index: 20;
     }
 
-    /* Profile Box */
+    /* Profile Card */
     .profile-card {
       display: flex;
       align-items: center;
       gap: 12px;
-      background: rgba(15, 23, 42, 0.75);
-      border: 1px solid rgba(255, 255, 255, 0.15);
-      padding: 10px 18px;
+      background: rgba(15, 23, 42, 0.85);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      padding: 8px 16px;
       border-radius: 30px;
       backdrop-filter: blur(10px);
-      box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
       cursor: pointer;
       transition: all 0.3s ease;
     }
@@ -46,26 +46,26 @@
       box-shadow: 0 0 15px rgba(56, 189, 248, 0.4);
     }
     .profile-avatar {
-      width: 42px;
-      height: 42px;
+      width: 40px;
+      height: 40px;
       border-radius: 50%;
       background: linear-gradient(135deg, #38bdf8, #818cf8);
       display: flex;
       align-items: center;
       justify-content: center;
       font-weight: bold;
-      font-size: 1.2rem;
+      font-size: 1.1rem;
       border: 2px solid #fff;
     }
-    .profile-name { font-size: 1rem; font-weight: 600; color: #f8fafc; }
+    .profile-name { font-size: 0.95rem; font-weight: 600; color: #f8fafc; }
     .edit-icon { font-size: 0.8rem; color: #94a3b8; margin-left: 4px; }
 
-    /* Title */
+    /* Main Header Title */
     .header-title {
       position: absolute;
       left: 50%;
       transform: translateX(-50%);
-      font-size: 2.2rem;
+      font-size: 2rem;
       font-weight: 800;
       text-transform: uppercase;
       letter-spacing: 3px;
@@ -75,31 +75,14 @@
       text-shadow: 0 0 20px rgba(255, 255, 255, 0.2);
     }
 
-    /* Round Stopwatch (Right Side) */
-    .round-timer {
-      width: 80px;
-      height: 80px;
-      border-radius: 50%;
-      background: rgba(15, 23, 42, 0.85);
-      border: 3px solid #38bdf8;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      box-shadow: 0 0 20px rgba(56, 189, 248, 0.3);
-      backdrop-filter: blur(8px);
-    }
-    .timer-label { font-size: 0.65rem; color: #94a3b8; text-transform: uppercase; }
-    .timer-count { font-size: 1.1rem; font-weight: 700; font-family: monospace; color: #38bdf8; }
-
-    /* Controls & Audio Toggle */
+    /* Controls & Round Timer */
     .top-right-controls {
       display: flex;
       align-items: center;
       gap: 15px;
     }
     .audio-btn {
-      background: rgba(15, 23, 42, 0.8);
+      background: rgba(15, 23, 42, 0.85);
       border: 1px solid rgba(255, 255, 255, 0.2);
       width: 44px;
       height: 44px;
@@ -114,7 +97,48 @@
     }
     .audio-btn:hover { background: rgba(56, 189, 248, 0.2); border-color: #38bdf8; }
 
-    /* Central Menu overlay */
+    .round-timer {
+      width: 75px;
+      height: 75px;
+      border-radius: 50%;
+      background: rgba(15, 23, 42, 0.9);
+      border: 3px solid #38bdf8;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 0 20px rgba(56, 189, 248, 0.3);
+      backdrop-filter: blur(8px);
+    }
+    .timer-label { font-size: 0.6rem; color: #94a3b8; text-transform: uppercase; }
+    .timer-count { font-size: 1.1rem; font-weight: 700; font-family: monospace; color: #38bdf8; }
+
+    /* Exit Button (Visible during gameplay) */
+    #exit-btn {
+      display: none;
+      position: absolute;
+      bottom: 25px;
+      right: 25px;
+      z-index: 50;
+      background: linear-gradient(135deg, #ef4444, #991b1b);
+      border: 1px solid rgba(255, 255, 255, 0.3);
+      padding: 12px 24px;
+      border-radius: 25px;
+      color: #fff;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      cursor: pointer;
+      box-shadow: 0 0 15px rgba(239, 68, 68, 0.4);
+      transition: all 0.3s ease;
+    }
+    #exit-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 0 25px rgba(239, 68, 68, 0.7);
+      background: linear-gradient(135deg, #dc2626, #7f1d1d);
+    }
+
+    /* Central Overlay Menu */
     #menu-overlay {
       position: absolute;
       bottom: 60px;
@@ -130,7 +154,7 @@
     .btn {
       width: 220px;
       padding: 14px 28px;
-      font-size: 1.05rem;
+      font-size: 1rem;
       font-weight: 700;
       text-transform: uppercase;
       letter-spacing: 1px;
@@ -149,9 +173,7 @@
       box-shadow: 0 0 20px rgba(56, 189, 248, 0.5);
       background: linear-gradient(135deg, #0284c7, #0369a1);
     }
-    .btn-secondary {
-      background: rgba(30, 41, 59, 0.6);
-    }
+    .btn-secondary { background: rgba(30, 41, 59, 0.6); }
 
     .sub-menu {
       display: none;
@@ -165,7 +187,7 @@
       to { opacity: 1; transform: translateY(0); }
     }
 
-    /* Modal for Profile & Share Link */
+    /* Modals */
     .modal {
       display: none;
       position: absolute;
@@ -222,7 +244,10 @@
     </div>
   </div>
 
-  <!-- Landing & Game Navigation Menu -->
+  <!-- Exit Game Button -->
+  <button id="exit-btn" onclick="exitToMainMenu()">Exit to Menu</button>
+
+  <!-- Landing & Navigation Menu -->
   <div id="menu-overlay">
     <div id="main-buttons" style="display: flex; flex-direction: column; gap: 12px;">
       <button class="btn" onclick="showNewMatchOptions()">New Match</button>
@@ -255,7 +280,6 @@
   <div id="canvas-container"></div>
 
 <script>
-  // Game state & Mode flags
   let game = new Chess();
   let vsAI = false;
   let isMultiplayer = false;
@@ -265,14 +289,13 @@
   let gameStarted = false;
   let isGlobeMode = true;
 
-  // Audio Synth Context
+  // Audio Context
   let audioCtx = null;
   let isMuted = true;
 
   function initAudio() {
     if (!audioCtx) {
       audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-      playAmbientSound();
     }
   }
 
@@ -280,21 +303,6 @@
     initAudio();
     isMuted = !isMuted;
     document.getElementById('audio-toggle').innerText = isMuted ? '🔇' : '🎵';
-  }
-
-  function playAmbientSound() {
-    if (!audioCtx || isMuted) return;
-    try {
-      const osc = audioCtx.createOscillator();
-      const gain = audioCtx.createGain();
-      osc.type = 'sine';
-      osc.frequency.setValueAtTime(110, audioCtx.currentTime);
-      gain.gain.setValueAtTime(0.01, audioCtx.currentTime);
-      osc.connect(gain);
-      gain.connect(audioCtx.destination);
-      osc.start();
-      osc.stop(audioCtx.currentTime + 2);
-    } catch(e){}
   }
 
   // Timer Management
@@ -337,7 +345,7 @@
     document.getElementById('profile-modal').style.display = 'none';
   }
 
-  // Three.js Scene Setup
+  // Three.js Setup
   const container = document.getElementById('canvas-container');
   const scene = new THREE.Scene();
   scene.background = new THREE.Color(0x000000);
@@ -355,31 +363,40 @@
   controls.enableDamping = true;
   controls.dampingFactor = 0.05;
 
-  // Lighting
-  const ambientLight = new THREE.AmbientLight(0xffffff, 0.7);
+  // Lighting - Studio Lighting for High Realism
+  const ambientLight = new THREE.AmbientLight(0xffffff, 0.8);
   scene.add(ambientLight);
 
-  const dirLight1 = new THREE.DirectionalLight(0x38bdf8, 1.2);
-  dirLight1.position.set(15, 20, 15);
+  const dirLight1 = new THREE.DirectionalLight(0xffffff, 1.2);
+  dirLight1.position.set(20, 25, 20);
   dirLight1.castShadow = true;
+  dirLight1.shadow.mapSize.width = 2048;
+  dirLight1.shadow.mapSize.height = 2048;
   scene.add(dirLight1);
 
-  const dirLight2 = new THREE.DirectionalLight(0xffffff, 0.6);
-  dirLight2.position.set(-15, -10, -15);
+  const dirLight2 = new THREE.DirectionalLight(0x38bdf8, 0.5);
+  dirLight2.position.set(-20, -15, -20);
   scene.add(dirLight2);
 
-  // Material Palette (High Polish Metallic - Black and White)
+  // High-Contrast Clear Materials
   const whitePieceMat = new THREE.MeshStandardMaterial({
-    color: 0xf8fafc, roughness: 0.1, metalness: 0.85
+    color: 0xffffff,
+    roughness: 0.1,
+    metalness: 0.1,
+    emissive: 0x111111
   });
+
   const blackPieceMat = new THREE.MeshStandardMaterial({
-    color: 0x0f172a, roughness: 0.2, metalness: 0.9
+    color: 0x0d0d0d,
+    roughness: 0.2,
+    metalness: 0.8
   });
-  const whiteSquareMat = new THREE.MeshStandardMaterial({ color: 0xe2e8f0, roughness: 0.2, metalness: 0.3 });
-  const blackSquareMat = new THREE.MeshStandardMaterial({ color: 0x1e293b, roughness: 0.3, metalness: 0.5 });
+
+  const whiteSquareMat = new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 0.2, metalness: 0.1 });
+  const blackSquareMat = new THREE.MeshStandardMaterial({ color: 0x1a1a1a, roughness: 0.3, metalness: 0.3 });
   const highlightMat = new THREE.MeshStandardMaterial({ color: 0x38bdf8, roughness: 0.2, emissive: 0x0284c7 });
 
-  // Globe Showcase Group
+  // 3D Globe Group
   const globeGroup = new THREE.Group();
   scene.add(globeGroup);
 
@@ -387,7 +404,6 @@
     const sphereRadius = 6;
     const sphereGeom = new THREE.SphereGeometry(sphereRadius, 32, 32);
     
-    // Canvas texture generating checkered globe
     const canvas = document.createElement('canvas');
     canvas.width = 512; canvas.height = 256;
     const ctx = canvas.getContext('2d');
@@ -395,16 +411,15 @@
     const sw = canvas.width / cols, sh = canvas.height / rows;
     for(let r=0; r<rows; r++) {
       for(let c=0; c<cols; c++) {
-        ctx.fillStyle = (r + c) % 2 === 0 ? '#f8fafc' : '#0f172a';
+        ctx.fillStyle = (r + c) % 2 === 0 ? '#ffffff' : '#111111';
         ctx.fillRect(c*sw, r*sh, sw, sh);
       }
     }
     const texture = new THREE.CanvasTexture(canvas);
-    const globeMat = new THREE.MeshStandardMaterial({ map: texture, roughness: 0.3, metalness: 0.4 });
+    const globeMat = new THREE.MeshStandardMaterial({ map: texture, roughness: 0.3, metalness: 0.2 });
     const globeMesh = new THREE.Mesh(sphereGeom, globeMat);
     globeGroup.add(globeMesh);
 
-    // Attach decorative pieces on surface matching user Image 1
     const piecePositions = [
       { type: 'k', lat: 30, lon: 45, col: 'b' },
       { type: 'q', lat: 20, lon: 90, col: 'b' },
@@ -428,7 +443,7 @@
     });
   }
 
-  // Standard 3D Flat Board Group
+  // 3D Flat Board Group
   const boardGroup = new THREE.Group();
   const tiles = {};
   const pieceMeshes = {};
@@ -451,43 +466,49 @@
     }
   }
 
-  // 3D Piece Models Generator (Refined Glossy Metallic)
+  // Detailed Realistic Piece Geometries
   function createPieceMesh(type, color) {
     const group = new THREE.Group();
     const mat = color === 'w' ? whitePieceMat : blackPieceMat;
 
-    const base = new THREE.Mesh(new THREE.CylinderGeometry(0.6, 0.7, 0.25, 16), mat);
+    const base = new THREE.Mesh(new THREE.CylinderGeometry(0.65, 0.72, 0.25, 32), mat);
     base.position.y = 0.125;
     group.add(base);
 
     if (type === 'p') {
-      const body = new THREE.Mesh(new THREE.ConeGeometry(0.4, 0.8, 16), mat);
+      const body = new THREE.Mesh(new THREE.ConeGeometry(0.4, 0.85, 32), mat);
       body.position.y = 0.65;
-      group.add(body);
+      const top = new THREE.Mesh(new THREE.SphereGeometry(0.28, 16, 16), mat);
+      top.position.y = 1.15;
+      group.add(body, top);
     } else if (type === 'r') {
-      const body = new THREE.Mesh(new THREE.CylinderGeometry(0.45, 0.5, 0.9, 16), mat);
-      body.position.y = 0.7;
+      const body = new THREE.Mesh(new THREE.CylinderGeometry(0.45, 0.55, 1.0, 32), mat);
+      body.position.y = 0.75;
       group.add(body);
     } else if (type === 'n') {
-      const body = new THREE.Mesh(new THREE.BoxGeometry(0.4, 0.9, 0.6), mat);
-      body.position.y = 0.7;
+      const body = new THREE.Mesh(new THREE.BoxGeometry(0.4, 1.0, 0.65), mat);
+      body.position.y = 0.75;
       group.add(body);
     } else if (type === 'b') {
-      const body = new THREE.Mesh(new THREE.CylinderGeometry(0.15, 0.45, 1.1, 16), mat);
-      body.position.y = 0.8;
-      group.add(body);
+      const body = new THREE.Mesh(new THREE.CylinderGeometry(0.2, 0.5, 1.2, 32), mat);
+      body.position.y = 0.85;
+      const top = new THREE.Mesh(new THREE.SphereGeometry(0.25, 16, 16), mat);
+      top.position.y = 1.5;
+      group.add(body, top);
     } else if (type === 'q') {
-      const body = new THREE.Mesh(new THREE.CylinderGeometry(0.3, 0.5, 1.3, 16), mat);
-      body.position.y = 0.9;
-      const crown = new THREE.Mesh(new THREE.SphereGeometry(0.3, 16, 16), mat);
-      crown.position.y = 1.6;
+      const body = new THREE.Mesh(new THREE.CylinderGeometry(0.3, 0.55, 1.4, 32), mat);
+      body.position.y = 0.95;
+      const crown = new THREE.Mesh(new THREE.SphereGeometry(0.32, 16, 16), mat);
+      crown.position.y = 1.7;
       group.add(body, crown);
     } else if (type === 'k') {
-      const body = new THREE.Mesh(new THREE.CylinderGeometry(0.35, 0.55, 1.4, 16), mat);
-      body.position.y = 0.95;
-      const cross = new THREE.Mesh(new THREE.BoxGeometry(0.4, 0.12, 0.12), mat);
-      cross.position.y = 1.7;
-      group.add(body, cross);
+      const body = new THREE.Mesh(new THREE.CylinderGeometry(0.35, 0.6, 1.5, 32), mat);
+      body.position.y = 1.0;
+      const crossHorizontal = new THREE.Mesh(new THREE.BoxGeometry(0.45, 0.12, 0.12), mat);
+      crossHorizontal.position.y = 1.85;
+      const crossVertical = new THREE.Mesh(new THREE.BoxGeometry(0.12, 0.45, 0.12), mat);
+      crossVertical.position.y = 1.85;
+      group.add(body, crossHorizontal, crossVertical);
     }
 
     group.traverse(child => { if(child.isMesh) child.castShadow = true; });
@@ -513,7 +534,7 @@
     }
   }
 
-  // Menu Handling
+  // Navigation Logic
   function showNewMatchOptions() {
     initAudio();
     document.getElementById('main-buttons').style.display = 'none';
@@ -531,9 +552,27 @@
     game.reset();
     renderFlatBoardPieces();
     document.getElementById('menu-overlay').style.display = 'none';
+    document.getElementById('exit-btn').style.display = 'block';
     gameStarted = true;
     resetTimer();
     saveGameState();
+  }
+
+  function exitToMainMenu() {
+    isGlobeMode = true;
+    gameStarted = false;
+    clearInterval(timerInterval);
+    scene.remove(boardGroup);
+    scene.add(globeGroup);
+    
+    // Reset camera back to globe view
+    camera.position.set(0, 0, 22);
+    controls.target.set(0, 0, 0);
+
+    document.getElementById('exit-btn').style.display = 'none';
+    document.getElementById('menu-overlay').style.display = 'flex';
+    hideSubMenu();
+    document.getElementById('timer-val').innerText = "03:00";
   }
 
   function startVsComputer() {
@@ -603,7 +642,6 @@
     document.getElementById('share-modal').style.display = 'none';
   }
 
-  // Save / Continue Match Logic
   function saveGameState() {
     localStorage.setItem('chess_saved_fen', game.fen());
   }
@@ -613,12 +651,12 @@
       game.load(savedFen);
       startFlatGame();
     } else {
-      alert("No previous game found. Starting a new match!");
+      alert("No saved game found. Starting a new match!");
       showNewMatchOptions();
     }
   }
 
-  // Interaction Raycasting for Moves
+  // Interactive Raycasting for Moves
   const raycaster = new THREE.Raycaster();
   const mouse = new THREE.Vector2();
   let selectedSquare = null;
@@ -690,11 +728,10 @@
     }
   }
 
-  // Initialization
+  // Init
   createChessGlobe();
   createFlatBoard();
 
-  // Load saved username if present
   const savedUser = localStorage.getItem('chess_username');
   if (savedUser) {
     document.getElementById('display-name').innerText = savedUser;
@@ -709,7 +746,6 @@
     renderer.setSize(window.innerWidth, window.innerHeight);
   });
 
-  // Main Render Loop
   function animate() {
     requestAnimationFrame(animate);
 
