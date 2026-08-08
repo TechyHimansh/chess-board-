@@ -1,0 +1,347 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>3D Rotating Chess Game</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      overflow: hidden;
+      background: #111;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      color: #fff;
+    }
+    #ui {
+      position: absolute;
+      top: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 10px;
+      z-index: 10;
+      background: rgba(20, 20, 20, 0.85);
+      padding: 15px 30px;
+      border-radius: 12px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.6);
+      backdrop-filter: blur(5px);
+      border: 1px solid rgba(255,255,255,0.1);
+    }
+    .status { font-size: 1.2rem; font-weight: 600; text-transform: uppercase; letter-spacing: 1px; }
+    .timer { font-size: 2.2rem; font-weight: bold; font-family: monospace; color: #ff4757; }
+    #info-text { font-size: 0.9rem; color: #aaa; margin-top: 2px; }
+  </style>
+
+  <!-- Include Three.js, OrbitControls, and Chess.js -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/chess.js/0.10.3/chess.min.js"></script>
+</head>
+<body>
+
+  <div id="ui">
+    <div class="status" id="turn-display">Turn: <span id="player-turn" style="color: #fff;">White</span></div>
+    <div class="timer" id="timer">03:00</div>
+    <div id="info-text">Click a piece to select, then click a tile to move</div>
+  </div>
+
+<script>
+  // Game Logic
+  const game = new Chess();
+  const BOARD_SIZE = 8;
+  const TILE_SIZE = 2;
+
+  // Scene setup
+  const scene = new THREE.Scene();
+  scene.background = new THREE.Color(0x181818);
+
+  const camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 1000);
+  const renderer = new THREE.WebGLRenderer({ antialias: true });
+  renderer.setSize(window.innerWidth, window.innerHeight);
+  renderer.shadowMap.enabled = true;
+  document.body.appendChild(renderer.domElement);
+
+  const controls = new THREE.OrbitControls(camera, renderer.domElement);
+  controls.enableDamping = true;
+  controls.dampingFactor = 0.05;
+  controls.maxPolarAngle = Math.PI / 2 - 0.05;
+
+  // Lights
+  const ambientLight = new THREE.AmbientLight(0xffffff, 0.6);
+  scene.add(ambientLight);
+
+  const dirLight = new THREE.DirectionalLight(0xffffff, 0.8);
+  dirLight.position.set(10, 20, 10);
+  dirLight.castShadow = true;
+  dirLight.shadow.mapSize.width = 2048;
+  dirLight.shadow.mapSize.height = 2048;
+  scene.add(dirLight);
+
+  // Materials
+  const whiteSquareMat = new THREE.MeshStandardMaterial({ color: 0xeeeeee, roughness: 0.3 });
+  const blackSquareMat = new THREE.MeshStandardMaterial({ color: 0x222222, roughness: 0.3 });
+  const highlightMat = new THREE.MeshStandardMaterial({ color: 0x2ed573, roughness: 0.2 });
+  const selectedSquareMat = new THREE.MeshStandardMaterial({ color: 0xffa500, roughness: 0.2 });
+
+  const whitePieceMat = new THREE.MeshStandardMaterial({ color: 0xf5f5f5, roughness: 0.1, metalness: 0.1 });
+  const blackPieceMat = new THREE.MeshStandardMaterial({ color: 0x1c1c1c, roughness: 0.2, metalness: 0.2 });
+
+  // Board setup
+  const boardGroup = new THREE.Group();
+  scene.add(boardGroup);
+  const tiles = {};
+  const pieceMeshes = {};
+
+  function createBoard() {
+    for (let r = 0; r < 8; r++) {
+      for (let c = 0; c < 8; c++) {
+        const isWhite = (r + c) % 2 === 0;
+        const geom = new THREE.BoxGeometry(TILE_SIZE, 0.4, TILE_SIZE);
+        const mat = isWhite ? whiteSquareMat : blackSquareMat;
+        const tile = new THREE.Mesh(geom, mat);
+        
+        tile.position.set((c - 3.5) * TILE_SIZE, -0.2, (3.5 - r) * TILE_SIZE);
+        tile.receiveShadow = true;
+        
+        const squareName = String.fromCharCode(97 + c) + (r + 1);
+        tile.userData = { square: squareName, defaultMat: mat };
+        
+        boardGroup.add(tile);
+        tiles[squareName] = tile;
+      }
+    }
+  }
+
+  // 3D Piece Models Generation
+  function createPieceGeometry(type) {
+    const group = new THREE.Group();
+    let geom;
+
+    // Base for all pieces
+    const base = new THREE.Mesh(new THREE.CylinderGeometry(0.7, 0.8, 0.3, 16), whitePieceMat);
+    base.position.y = 0.15;
+    base.castShadow = true;
+    group.add(base);
+
+    if (type === 'p') {
+      const body = new THREE.Mesh(new THREE.ConeGeometry(0.5, 1.0, 16), whitePieceMat);
+      body.position.y = 0.8;
+      group.add(body);
+    } else if (type === 'r') {
+      const body = new THREE.Mesh(new THREE.CylinderGeometry(0.5, 0.6, 1.2, 16), whitePieceMat);
+      body.position.y = 0.9;
+      group.add(body);
+    } else if (type === 'n') {
+      const body = new THREE.Mesh(new THREE.BoxGeometry(0.5, 1.2, 0.7), whitePieceMat);
+      body.position.y = 0.9;
+      group.add(body);
+    } else if (type === 'b') {
+      const body = new THREE.Mesh(new THREE.CylinderGeometry(0.2, 0.5, 1.4, 16), whitePieceMat);
+      body.position.y = 1.0;
+      group.add(body);
+    } else if (type === 'q') {
+      const body = new THREE.Mesh(new THREE.CylinderGeometry(0.4, 0.6, 1.6, 16), whitePieceMat);
+      body.position.y = 1.1;
+      const top = new THREE.Mesh(new THREE.SphereGeometry(0.35, 16, 16), whitePieceMat);
+      top.position.y = 2.0;
+      group.add(body, top);
+    } else if (type === 'k') {
+      const body = new THREE.Mesh(new THREE.CylinderGeometry(0.4, 0.6, 1.7, 16), whitePieceMat);
+      body.position.y = 1.15;
+      const crossHorizontal = new THREE.Mesh(new THREE.BoxGeometry(0.5, 0.15, 0.15), whitePieceMat);
+      crossHorizontal.position.y = 2.1;
+      const crossVertical = new THREE.Mesh(new THREE.BoxGeometry(0.15, 0.5, 0.15), whitePieceMat);
+      crossVertical.position.y = 2.1;
+      group.add(body, crossHorizontal, crossVertical);
+    }
+
+    group.traverse(child => {
+      if (child.isMesh) child.castShadow = true;
+    });
+
+    return group;
+  }
+
+  function renderPieces() {
+    // Clear old pieces
+    Object.values(pieceMeshes).forEach(mesh => scene.remove(mesh));
+    
+    const boardState = game.board();
+    for (let r = 0; r < 8; r++) {
+      for (let c = 0; c < 8; c++) {
+        const piece = boardState[r][c];
+        if (piece) {
+          const squareName = String.fromCharCode(97 + c) + (8 - r);
+          const pieceObj = createPieceGeometry(piece.type);
+          
+          // Apply materials
+          pieceObj.traverse(child => {
+            if (child.isMesh) child.material = piece.color === 'w' ? whitePieceMat : blackPieceMat;
+          });
+
+          const tile = tiles[squareName];
+          pieceObj.position.set(tile.position.x, 0, tile.position.z);
+          scene.add(pieceObj);
+          pieceMeshes[squareName] = pieceObj;
+        }
+      }
+    }
+  }
+
+  // Camera Control & Smooth Rotation
+  let targetAngle = 0;
+  let currentAngle = 0;
+  const radius = 22;
+
+  function setCameraAngle(angle, animate = true) {
+    targetAngle = angle;
+    if (!animate) {
+      currentAngle = angle;
+      updateCameraPosition();
+    }
+  }
+
+  function updateCameraPosition() {
+    camera.position.x = radius * Math.sin(currentAngle);
+    camera.position.z = radius * Math.cos(currentAngle);
+    camera.position.y = 16;
+    camera.lookAt(0, 0, 0);
+  }
+
+  // Timer Management
+  let timeLeft = 180; // 3 minutes in seconds
+  let timerInterval = null;
+
+  function startTimer() {
+    clearInterval(timerInterval);
+    timeLeft = 180;
+    updateTimerDisplay();
+
+    timerInterval = setInterval(() => {
+      timeLeft--;
+      updateTimerDisplay();
+
+      if (timeLeft <= 0) {
+        clearInterval(timerInterval);
+        alert(`Time's up! ${game.turn() === 'w' ? 'Black' : 'White'} wins by timeout!`);
+      }
+    }, 1000);
+  }
+
+  function updateTimerDisplay() {
+    const mins = Math.floor(timeLeft / 60).toString().padStart(2, '0');
+    const secs = (timeLeft % 60).toString().padStart(2, '0');
+    document.getElementById('timer').innerText = `${mins}:${secs}`;
+  }
+
+  // Selection & Interactions
+  let selectedSquare = null;
+  const raycaster = new THREE.Raycaster();
+  const mouse = new THREE.Vector2();
+
+  function clearHighlights() {
+    Object.values(tiles).forEach(t => t.material = t.userData.defaultMat);
+  }
+
+  function onPointerDown(event) {
+    mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
+    mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
+
+    raycaster.setFromCamera(mouse, camera);
+    const intersects = raycaster.intersectObjects(boardGroup.children);
+
+    if (intersects.length > 0) {
+      const tile = intersects[0].object;
+      const square = tile.userData.square;
+
+      if (selectedSquare) {
+        // Attempt move
+        const move = game.move({ from: selectedSquare, to: square, promotion: 'q' });
+
+        if (move) {
+          renderPieces();
+          clearHighlights();
+          selectedSquare = null;
+          switchTurn();
+          return;
+        }
+      }
+
+      // Selection logic
+      const piece = game.get(square);
+      if (piece && piece.color === game.turn()) {
+        selectedSquare = square;
+        clearHighlights();
+        tile.material = selectedSquareMat;
+
+        // Highlight valid moves
+        const moves = game.moves({ square: square, verbose: true });
+        moves.forEach(m => {
+          tiles[m.to].material = highlightMat;
+        });
+      } else {
+        selectedSquare = null;
+        clearHighlights();
+      }
+    }
+  }
+
+  function switchTurn() {
+    const currentTurn = game.turn();
+    const turnText = currentTurn === 'w' ? 'White' : 'Black';
+    const playerTurnEl = document.getElementById('player-turn');
+    playerTurnEl.innerText = turnText;
+    playerTurnEl.style.color = currentTurn === 'w' ? '#ffffff' : '#aaaaaa';
+
+    // Rotate camera 180 degrees
+    if (currentTurn === 'w') {
+      setCameraAngle(0);
+    } else {
+      setCameraAngle(Math.PI);
+    }
+
+    // Reset and restart 3-minute timer
+    startTimer();
+
+    if (game.in_checkmate()) {
+      alert(`Checkmate! ${currentTurn === 'w' ? 'Black' : 'White'} wins!`);
+      clearInterval(timerInterval);
+    } else if (game.in_draw()) {
+      alert('Game over! Draw!');
+      clearInterval(timerInterval);
+    }
+  }
+
+  // Initialization
+  createBoard();
+  renderPieces();
+  setCameraAngle(0, false);
+  startTimer();
+
+  window.addEventListener('pointerdown', onPointerDown);
+  window.addEventListener('resize', () => {
+    camera.aspect = window.innerWidth / window.innerHeight;
+    camera.updateProjectionMatrix();
+    renderer.setSize(window.innerWidth, window.innerHeight);
+  });
+
+  // Animation Loop
+  function animate() {
+    requestAnimationFrame(animate);
+
+    // Smooth camera rotation transition
+    if (Math.abs(targetAngle - currentAngle) > 0.01) {
+      currentAngle += (targetAngle - currentAngle) * 0.05;
+      updateCameraPosition();
+    }
+
+    controls.update();
+    renderer.render(scene, camera);
+  }
+
+  animate();
+</script>
+</body>
+</html>
